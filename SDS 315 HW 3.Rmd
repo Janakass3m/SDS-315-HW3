@@ -1,0 +1,149 @@
+---
+title: "SDS 315 HW 3"
+author: "Jana Kassem"
+date: "2024-02-04"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+EID: jmk4958
+
+Github Link: <https://github.com/Janakass3m/SDS-315-HW3>.
+
+# 1
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+#load packages
+library(ggplot2)
+library(dplyr)
+library(mosaic)
+
+#Import Excel sheet as a dataset
+creatine <- read.csv("creatinine.csv")
+```
+
+### Part A
+
+```{r echo=FALSE, warning=FALSE}
+model_cc = lm(creatclear ~ age, data=creatine)
+guess <- predict(model_cc, newdata = data.frame(age=55))
+```
+The linear regression equation that fits with the given data is y = 148 - .62x . From this equation, when we input 55 into x we get 113.723 mL/minute as the predicted clearance rate for the 55 year old.. 
+
+
+### Part B
+
+The creatine clearance rate of change decreases by .62 mL/minute per year. This was determined from the linear regression model, as the slope is representative of rate of change.
+
+
+### Part C
+
+```{r echo=FALSE, warning=FALSE}
+forty <- predict(model_cc, newdata = data.frame(age=40))
+sixty <- predict(model_cc, newdata = data.frame(age=60))
+
+fortyresid <- 135 - forty
+sixtyresid <- 112- sixty
+```
+The forty year old has the healthier creatine for their age because their residual is 12 while the sixty year old's residual is 1.38. To solve for residual it is actual- predicted which represents the difference between the point and the predicted value in the regression line. 
+
+# 2
+
+```{r echo=FALSE, warning=FALSE}
+market <- read.csv("marketmodel.csv")
+```
+
+The beta of a stock is a measure of systematic risk related to the market as a whole and cannot be diversified away. Companies with a beta of less than 1 have less systematic risk than an average firm. A company with a beta of 0 means they have no systematic risk. A beta higher than 1 has a higher risk because although it would increase when the market increases, if the market drops, it falls well below the market. A negative beta is like having an insurance policy because it is going to do well while the rest of the market is collapsing. In the regression model, Beta is classified as the slope coefficient. This means it’s the rate of change of the sensitivity of the stock per percent change in the market. 
+
+```{r echo=FALSE, message=FALSE}
+
+modelAAPL <- lm(SPY ~ AAPL, data = market)
+intercept1 <- coef(modelAAPL)[1]
+slope1 <- coef(modelAAPL)[2]
+r1 <- rsquared(modelAAPL)
+
+modelGOOG <- lm(SPY ~ GOOG, data = market)
+intercept2 <- coef(modelGOOG)[1]
+slope2 <- coef(modelGOOG)[2]
+r2 <- rsquared(modelGOOG)
+
+modelMRK <- lm(SPY ~ MRK, data = market)
+intercept3 <- coef(modelMRK)[1]
+slope3 <- coef(modelMRK)[2]
+r3 <- rsquared(modelMRK)
+
+modelJNJ <- lm(SPY ~ JNJ, data = market)
+intercept4 <- coef(modelJNJ)[1]
+slope4 <- coef(modelJNJ)[2]
+r4 <- rsquared(modelJNJ)
+
+modelWMT <- lm(SPY ~ WMT, data = market)
+intercept5 <- coef(modelWMT)[1]
+slope5 <- coef(modelWMT)[2]
+r5 <- rsquared(modelWMT)
+
+modelTGT <- lm(SPY ~ TGT, data = market)
+intercept6 <- coef(modelTGT)[1]
+slope6 <- coef(modelTGT)[2]
+r6 <- rsquared(modelTGT)
+
+
+stocktable <- tibble(
+  Ticker = c("AAPL", "GOOG", "MRK", "JNJ", "WMT", "TGT"),
+  Intercept = c(intercept1, intercept2, intercept3, intercept4, intercept5, intercept6),
+  Slope = c(slope1, slope2, slope3, slope4, slope5, slope6),
+  R_squared = c(r1, r2, r3, r4, r5, r6)
+)
+
+stocktable
+```
+This table represents the regression for 6 stocks individually (Apple, Google, Merck, Johnson and Johnson, Walmart, and Target). It displays the slope and intercept of the regression model and then includes the R squared value. 
+
+The stock with the lowest systematic risk is Apple because it's beta is the lowest value meaning if there was a shift in the market, it has the lowest risk of loosing value. The stock with the highest systematic risk is Johnson and Johnson because it is more sensitive to market movements with the highest beta score.
+
+# 3
+
+```{r echo=FALSE, warning=FALSE}
+covid <- read.csv("covid.csv")
+```
+
+```{r echo=FALSE, message=FALSE}
+ggplot(covid, aes(x = days_since_first_death, y = deaths, color = country)) +
+  geom_line() +
+  labs(title = "Reported Covid Deaths Since First Death",
+       x = "Days Since First Death",
+       y = "Daily Deaths",
+       color = "Country") +
+  theme_classic()
+
+italy <- filter(covid, country == "Italy")
+modelitaly <- lm( log(deaths) ~ days_since_first_death, data = italy)
+italy_growth_rate <- coef(modelitaly)[2]
+doubleitaly <- log(2)/italy_growth_rate
+
+spain <- filter(covid, country == "Spain")
+modelspain <- lm( log(deaths) ~ days_since_first_death, data = spain)
+spain_growth_rate <- coef(modelspain)[2]
+doublespain <- log(2)/spain_growth_rate
+
+```
+The growth rate of Italy is .183 deaths per day and the growth rate of Spain is 0.276 deaths per day. The doubling time for Italy is 4 days and the doubling time for Spain is 3 days. 
+
+# 4
+
+```{r echo=FALSE, warning=FALSE}
+milk <- read.csv("milk.csv")
+```
+
+
+```{r echo=FALSE, message=FALSE}
+lm_milk = lm(log(sales) ~ log(price), data=milk)
+elast <- coef(lm_milk)
+
+```
+The estimated price elasticity of demand for milk is -1.619. To find this you find the linear model of the log variables because the power law says that the graph is linear when you plot with log. When the equation is transformed from log scale to power, -1.62 becomes the estimated elasticity. This means that when the price of milk increases by 1%, the consumers decrease the chance of buying it by 1.62%.
